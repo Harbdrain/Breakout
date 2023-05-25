@@ -8,3 +8,4 @@ set(WARNING_FLAGS -pedantic -Wall -Wextra -Werror -Wshadow -Wconversion -Wpointe
 
 add_executable(breakout src/platform.c)
 target_compile_options(breakout PUBLIC ${WARNING_FLAGS})
+target_link_libraries(breakout SDL2)
