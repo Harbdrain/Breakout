@@ -1,14 +1,11 @@
 #include <SDL2/SDL.h>
+#include <assert.h>
 #include <stdio.h>
 
 int main(void) {
-    if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) == 0) {
-        printf("SDL initialized.\n");
-    }
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    SDL_CreateWindow("Breakout", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                     800, 600, 0);
+    assert(SDL_InitSubSystem(SDL_INIT_EVERYTHING) == 0);
+    assert(SDL_CreateWindow("Breakout", SDL_WINDOWPOS_CENTERED,
+                            SDL_WINDOWPOS_CENTERED, 800, 600, 0));
 
     int exit = 0;
     while (!exit) {
