@@ -1,3 +1,4 @@
 #!/bin/bash
+export CC=/usr/bin/clang
 [ ! -d build ] && mkdir build && cmake -B build
-CC=clang cmake --build build
+cmake --build build
