@@ -60,7 +60,7 @@ int main(void) {
         Color color = {255, 0, 0};
         renderer_buffer_clear(renderer, color);
 
-        renderer_color_set(&color, 0, 0, 255);
+        renderer_color_set(color, 0, 0, 255);
         renderer_buffer_rect_draw(renderer, 0, 0, 1000, 1000, color);
         renderer_buffer_present(renderer);
         SDL_Delay(1);
