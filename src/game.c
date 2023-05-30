@@ -7,7 +7,6 @@ typedef struct {
     int x;
     int y;
 } Vec2;
-
 typedef struct {
     int x, y;
     int w, h;
@@ -33,16 +32,13 @@ internal void game_coordinates_convert_from_virtual(int x, int y, int w, int h,
 
 internal void game_draw(void) {
     renderer_buffer_clear((Color){0, 0, 255});
-//    renderer_buffer_rect_draw_in_pixels(game.input_state.mouse_x - 100,
-//                                        game.target_window_h - 100, 200, 20,
-//                                        (Color){0, 255, 0});
     SDL_Rect rect;
     game_coordinates_convert_from_virtual(ball.x, ball.y, ball.w, ball.h,
                                           &rect);
-    renderer_buffer_rect_draw_in_pixels_r(&rect, (Color){4, 191, 110});
-    game_coordinates_convert_from_virtual(player.x, player.y, player.w, player.h,
-                                          &rect);
-    renderer_buffer_rect_draw_in_pixels_r(&rect, (Color){0, 255, 0});
+    renderer_buffer_rect_draw(&rect, (Color){4, 191, 110});
+    game_coordinates_convert_from_virtual(player.x, player.y, player.w,
+                                          player.h, &rect);
+    renderer_buffer_rect_draw(&rect, (Color){0, 255, 0});
     renderer_buffer_present();
 }
 

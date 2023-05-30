@@ -9,7 +9,6 @@ typedef struct {
     uint8 b;
 } Color;
 
-// TODO: move viewport_rect somewhere else?
 typedef struct {
     SDL_Renderer* renderer;
     SDL_Rect viewport_rect;
@@ -19,11 +18,7 @@ extern RendererState* renderer_init(SDL_Renderer* renderer,
                                     SDL_Rect viewport_rect);
 extern void renderer_buffer_clear(Color color);
 extern void renderer_buffer_present(void);
-extern void renderer_buffer_rect_draw_in_pixels(int x, int y, int w, int h,
-                                                Color color);
-extern void renderer_buffer_rect_draw_in_pixels_r(SDL_Rect* rect, Color color);
-extern void renderer_buffer_rect_draw(float x, float y, float w, float h,
-                                      Color color);
+extern void renderer_buffer_rect_draw(SDL_Rect* rect, Color color);
 extern void renderer_viewport_set(SDL_Rect rect);
 
 #define renderer_color_set(color, c_r, c_g, c_b) \
