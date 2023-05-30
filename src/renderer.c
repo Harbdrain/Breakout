@@ -2,24 +2,38 @@
 
 #include <SDL2/SDL.h>
 
-void renderer_buffer_clear(SDL_Renderer* renderer, Color color) {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b,
+internal RendererState state;
+
+RendererState* renderer_init(SDL_Renderer* renderer, SDL_Rect viewport_rect) {
+    state.renderer = renderer;
+    state.viewport_rect = viewport_rect;
+    return &state;
+}
+
+void renderer_buffer_clear(Color color) {
+    SDL_SetRenderDrawColor(state.renderer, color.r, color.g, color.b,
                            SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
+    SDL_RenderClear(state.renderer);
 }
 
-void renderer_buffer_present(SDL_Renderer* renderer) {
-    SDL_RenderPresent(renderer);
-}
+void renderer_buffer_present(void) { SDL_RenderPresent(state.renderer); }
 
-void renderer_buffer_rect_draw(SDL_Renderer* renderer, int x, int y, int w,
-                               int h, Color color) {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b,
+void renderer_buffer_rect_draw_in_pixels(int x, int y, int w, int h,
+                                         Color color) {
+    SDL_SetRenderDrawColor(state.renderer, color.r, color.g, color.b,
                            SDL_ALPHA_OPAQUE);
     SDL_Rect rect;
     rect.x = x;
     rect.y = y;
     rect.w = w;
     rect.h = h;
-    SDL_RenderFillRect(renderer, &rect);
+    SDL_RenderFillRect(state.renderer, &rect);
+}
+
+void renderer_viewport_set(SDL_Rect rect) {
+    state.viewport_rect.x = rect.x;
+    state.viewport_rect.y = rect.y;
+    state.viewport_rect.h = rect.h;
+    state.viewport_rect.w = rect.w;
+    SDL_RenderSetViewport(state.renderer, &rect);
 }

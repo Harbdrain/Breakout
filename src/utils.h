@@ -7,3 +7,4 @@
 #define internal static
 
 typedef uint8_t uint8;
+typedef uint64_t uint64;

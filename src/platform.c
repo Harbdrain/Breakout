@@ -1,30 +1,36 @@
 #include <SDL2/SDL.h>
-#include <assert.h>
 #include <stdio.h>
 
+#include "game.h"
 #include "renderer.h"
 
-internal int running;
-internal int const target_w = 800;
-internal int const target_h = 600;
-internal SDL_Renderer* renderer;
+internal RendererState* renderer_state;
+internal Game* game;
 
-internal void event_process(SDL_Event event) {
+internal void platform_event_process(SDL_Event event) {
     switch (event.type) {
         case SDL_QUIT: {
-            running = 0;
+            game->running = 0;
         } break;
         case SDL_KEYUP: {
             if (event.key.keysym.sym == SDLK_ESCAPE) {
-                running = 0;
+                game->running = 0;
             }
+        } break;
+        case SDL_MOUSEMOTION: {
+            game->input_state.mouse_x =
+                event.motion.x - renderer_state->viewport_rect.x;
+            game->input_state.mouse_y =
+                event.motion.y - renderer_state->viewport_rect.y;
         } break;
         case SDL_WINDOWEVENT: {
             if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                 int w = event.window.data1;
                 int h = event.window.data2;
-                SDL_Rect rect = {0};
+                SDL_Rect rect = (SDL_Rect){0};
 
+                int target_w = game->target_window_w;
+                int target_h = game->target_window_h;
                 // (w / h > target_w / target_h)
                 if (w * target_h > target_w * h) {
                     rect.h = h;
@@ -35,35 +41,68 @@ internal void event_process(SDL_Event event) {
                     rect.h = w * target_h / target_w;
                     rect.y = (h - rect.h) / 2;
                 }
-                SDL_RenderSetViewport(renderer, &rect);
+                renderer_viewport_set(rect);
             }
         } break;
     }
 }
 
-int main(void) {
-    assert(SDL_InitSubSystem(SDL_INIT_EVERYTHING) == 0);
-    SDL_Window* window =
-        SDL_CreateWindow("Breakout", SDL_WINDOWPOS_CENTERED,
-                         SDL_WINDOWPOS_CENTERED, target_w, target_h, 0);
-    assert(window);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    assert(renderer);
+internal int platform_init(void) {
+    // SDL init
+    if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0) {
+        printf("SDL subsystem initialization failed: %s\n", SDL_GetError());
+        return -1;
+    }
+    SDL_Window* window = SDL_CreateWindow(
+        "Breakout", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        game->target_window_w, game->target_window_h, 0);
+    if (!window) {
+        printf("Window creation failed: %s\n", SDL_GetError());
+        return -1;
+    }
+    SDL_Renderer* renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        printf("Renderer creation failed: %s\n", SDL_GetError());
+        return -1;
+    }
+    
+    // game init
+    renderer_state = renderer_init(
+        renderer,
+        (SDL_Rect){0, 0, game->target_window_w, game->target_window_h});
+    game = game_init();
+    return 0;
+}
 
-    running = 1;
-    while (running) {
+int main(void) {
+    if (platform_init() != 0) {
+        return 0;
+    }
+
+    game->running = 1;
+    uint64 last_time = SDL_GetTicks64();
+    uint64 frames_count = 0;
+    while (game->running) {
+        // process events
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            event_process(event);
+            platform_event_process(event);
         }
 
-        Color color = {255, 0, 0};
-        renderer_buffer_clear(renderer, color);
+        // draw things
+        game->draw();
 
-        renderer_color_set(color, 0, 0, 255);
-        renderer_buffer_rect_draw(renderer, 0, 0, 1000, 1000, color);
-        renderer_buffer_present(renderer);
-        SDL_Delay(1);
+        // count FPS
+        uint64 cur_time = SDL_GetTicks64();
+        frames_count++;
+        if (cur_time - last_time >= 1000) {
+            float fps =
+                (float)(1000 * frames_count) / (float)(cur_time - last_time);
+            printf("FPS: %f\n", fps);
+            frames_count = 0;
+            last_time = cur_time;
+        }
     }
     return 0;
 }
