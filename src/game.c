@@ -13,9 +13,14 @@ typedef struct {
     int w, h;
     Vec2 velocity;
 } Ball;
+typedef struct {
+    int x, y;
+    int w, h;
+} Block;
 
 internal Game game = {0};
 internal Ball ball = {0};
+internal Block player = {0};
 
 // TODO: temporary function. Change later. Also it does not account viewport
 internal void game_coordinates_convert_from_virtual(int x, int y, int w, int h,
@@ -28,17 +33,21 @@ internal void game_coordinates_convert_from_virtual(int x, int y, int w, int h,
 
 internal void game_draw(void) {
     renderer_buffer_clear((Color){0, 0, 255});
-    renderer_buffer_rect_draw_in_pixels(game.input_state.mouse_x - 100,
-                                        game.target_window_h - 100, 200, 20,
-                                        (Color){0, 255, 0});
+//    renderer_buffer_rect_draw_in_pixels(game.input_state.mouse_x - 100,
+//                                        game.target_window_h - 100, 200, 20,
+//                                        (Color){0, 255, 0});
     SDL_Rect rect;
     game_coordinates_convert_from_virtual(ball.x, ball.y, ball.w, ball.h,
                                           &rect);
     renderer_buffer_rect_draw_in_pixels_r(&rect, (Color){4, 191, 110});
+    game_coordinates_convert_from_virtual(player.x, player.y, player.w, player.h,
+                                          &rect);
+    renderer_buffer_rect_draw_in_pixels_r(&rect, (Color){0, 255, 0});
     renderer_buffer_present();
 }
 
 internal void game_update(void) {
+    // Ball
     ball.x += ball.velocity.x;
     ball.y += ball.velocity.y;
     if (ball.x < ball.w / 2 || ball.x > game.target_window_w - ball.w / 2) {
@@ -47,6 +56,9 @@ internal void game_update(void) {
     if (ball.y < ball.h / 2 || ball.y > game.target_window_h - ball.h / 2) {
         ball.velocity.y *= -1;
     }
+    // Player
+    // TODO: account viewport
+    player.x = game.input_state.mouse_x;
 }
 
 Game* game_init(void) {
@@ -56,5 +68,6 @@ Game* game_init(void) {
     game.update = &game_update;
 
     ball = (Ball){400, 500, 20, 20, {2, -4}};
+    player = (Block){game.target_window_w / 2, 100, 200, 20};
     return &game;
 }
