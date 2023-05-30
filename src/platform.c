@@ -48,7 +48,8 @@ internal void platform_event_process(SDL_Event event) {
 }
 
 internal int platform_init(void) {
-    // SDL init
+    game = game_init();
+
     if (SDL_InitSubSystem(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL subsystem initialization failed: %s\n", SDL_GetError());
         return -1;
@@ -66,12 +67,10 @@ internal int platform_init(void) {
         printf("Renderer creation failed: %s\n", SDL_GetError());
         return -1;
     }
-    
-    // game init
+
     renderer_state = renderer_init(
         renderer,
         (SDL_Rect){0, 0, game->target_window_w, game->target_window_h});
-    game = game_init();
     return 0;
 }
 
