@@ -3,19 +3,58 @@
 #include "renderer.h"
 #include "utils.h"
 
+typedef struct {
+    int x;
+    int y;
+} Vec2;
+
+typedef struct {
+    int x, y;
+    int w, h;
+    Vec2 velocity;
+} Ball;
+
 internal Game game = {0};
+internal Ball ball = {0};
+
+// TODO: temporary function. Change later. Also it does not account viewport
+internal void game_coordinates_convert_from_virtual(int x, int y, int w, int h,
+                                                    SDL_Rect* rect) {
+    rect->x = x - w / 2;
+    rect->y = game.target_window_h - y - h / 2;
+    rect->w = w;
+    rect->h = h;
+}
 
 internal void game_draw(void) {
-    renderer_buffer_clear((Color){255, 0, 0});
-    renderer_buffer_rect_draw_in_pixels(0, 0, 1000, 1000, (Color){0, 0, 255});
-    renderer_buffer_rect_draw_in_pixels(game.input_state.mouse_x - 100, 50, 200,
-                                        20, (Color){0, 255, 0});
+    renderer_buffer_clear((Color){0, 0, 255});
+    renderer_buffer_rect_draw_in_pixels(game.input_state.mouse_x - 100,
+                                        game.target_window_h - 100, 200, 20,
+                                        (Color){0, 255, 0});
+    SDL_Rect rect;
+    game_coordinates_convert_from_virtual(ball.x, ball.y, ball.w, ball.h,
+                                          &rect);
+    renderer_buffer_rect_draw_in_pixels_r(&rect, (Color){4, 191, 110});
     renderer_buffer_present();
+}
+
+internal void game_update(void) {
+    ball.x += ball.velocity.x;
+    ball.y += ball.velocity.y;
+    if (ball.x < ball.w / 2 || ball.x > game.target_window_w - ball.w / 2) {
+        ball.velocity.x *= -1;
+    }
+    if (ball.y < ball.h / 2 || ball.y > game.target_window_h - ball.h / 2) {
+        ball.velocity.y *= -1;
+    }
 }
 
 Game* game_init(void) {
     game.target_window_w = 800;
     game.target_window_h = 600;
     game.draw = &game_draw;
+    game.update = &game_update;
+
+    ball = (Ball){400, 500, 20, 20, {2, -4}};
     return &game;
 }

@@ -89,7 +89,8 @@ int main(void) {
             platform_event_process(event);
         }
 
-        // draw things
+        // game logic
+        game->update();
         game->draw();
 
         // count FPS

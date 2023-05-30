@@ -12,6 +12,7 @@ typedef struct {
     InputState input_state;
 
     void (*draw)(void);
+    void (*update)(void);
 } Game;
 
 extern Game* game_init(void);
